@@ -1,20 +1,18 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:crypto/crypto.dart';
+
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:satoshi/utils/extensions.dart';
-import 'package:satoshi/utils/functions.dart';
-import 'package:satoshi/utils/globalvar.dart';
-import 'package:satoshi/view/widget/button_widget.dart';
-import 'package:satoshi/view/widget/text_widget.dart';
+import 'package:guci_apps/utils/extensions.dart';
+import 'package:guci_apps/utils/functions.dart';
+import 'package:guci_apps/utils/globalvar.dart';
+import 'package:guci_apps/views/widget/button_widget.dart';
+import 'package:guci_apps/views/widget/text_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class SigninView extends StatefulWidget {
   const SigninView({super.key});
@@ -31,7 +29,6 @@ class _SigninViewState extends State<SigninView> {
   final TextEditingController _passwordTextController = TextEditingController();
 
   bool _passwordVisible = false;
-  bool _emailerror = false;
   bool _haserror = false;
 
   @override
@@ -44,47 +41,10 @@ class _SigninViewState extends State<SigninView> {
     super.dispose();
   }
 
-  String? validateEmail(String? email) {
-    dynamic isValid = EmailValidator.validate('$email');
-
-    // Navigator.pop(context);
-    if (email == null || email.isEmpty) {
-      setState(() {
-        _emailerror = true;
-      });
-      return "Please enter your email";
-    }
-
-    if (!isValid) {
-      setState(() {
-        _emailerror = true;
-      });
-      return "Please enter a valid email";
-    }
-
-    return null;
-  }
-
-  Future<void> _launchURL() async {
-    String url = "";
-    url = '$urlbase/member/auth/register';
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Future<String?> _getId() async {
-    var deviceInfo = DeviceInfoPlugin();
-    final androidInfo = await deviceInfo.androidInfo;
-    return androidInfo.id;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         body: SafeArea(
           minimum: EdgeInsets.symmetric(horizontal: 3.w),
           child: SingleChildScrollView(
@@ -119,7 +79,7 @@ class _SigninViewState extends State<SigninView> {
                     width: 100.w,
                     height: (_haserror) ? 38.h : 35.h,
                     decoration: BoxDecoration(
-                      color: const Color(0x4ACCB78F), // Background color
+                       color: const Color(0xFFD0E7FA), // Background color
                       borderRadius:
                           BorderRadius.circular(10), // Rounded corners
                     ),
@@ -134,15 +94,15 @@ class _SigninViewState extends State<SigninView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const TextWidget(
-                                text: "Email Address",
+                                text: "Username",
                                 fontsize: 12,
                               ),
                               SizedBox(height: 0.5.h),
                               SizedBox(
-                                height: (_emailerror) ? 10.h : 6.h,
+                                height: 6.h,
                                 child: TextFormField(
                                   style: const TextStyle(
-                                      color: Colors.white, fontSize: 12),
+                                      color: Colors.black, fontSize: 12),
                                   controller: _emailTextController,
                                   maxLines: 1,
                                   keyboardType: TextInputType.text,
@@ -158,7 +118,7 @@ class _SigninViewState extends State<SigninView> {
                                         onPressed: () {}),
                                     fillColor: Colors.white,
                                     isDense: true,
-                                    prefixIconColor: Colors.white,
+                                    prefixIconColor: Colors.black,
                                     focusedErrorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10.0),
                                       borderSide: const BorderSide(
@@ -175,13 +135,13 @@ class _SigninViewState extends State<SigninView> {
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: const BorderSide(
-                                          color: Color(0xFFBFA573), width: 1.0),
+                                          color: Colors.blue, width: 1.0),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10),
                                       borderSide: const BorderSide(
-                                          color: Color(0xFFBFA573), width: 1.0),
+                                          color: Colors.blue, width: 1.0),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(
                                       vertical:
@@ -192,9 +152,8 @@ class _SigninViewState extends State<SigninView> {
                                         fontSize: 10,
                                         color:
                                             Color.fromRGBO(163, 163, 163, 1)),
-                                    hintText: 'Enter your email address',
+                                    hintText: 'Enter your username',
                                   ),
-                                  validator: validateEmail,
                                 ),
                               ),
                               SizedBox(
@@ -213,7 +172,7 @@ class _SigninViewState extends State<SigninView> {
                                   maxLines: 1,
                                   keyboardType: TextInputType.text,
                                   style: const TextStyle(
-                                      color: Colors.white, fontSize: 12),
+                                      color: Colors.black, fontSize: 12),
                                   decoration: InputDecoration(
                                     suffixIcon: IconButton(
                                         padding: EdgeInsets.zero,
@@ -249,13 +208,13 @@ class _SigninViewState extends State<SigninView> {
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: const BorderSide(
-                                          color: Color(0xFFBFA573), width: 1.0),
+                                          color: Colors.blue, width: 1.0),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10.0),
                                       borderSide: const BorderSide(
-                                          color: Color(0xFFBFA573), width: 1.0),
+                                          color: Colors.blue, width: 1.0),
                                     ),
                                     hintStyle: const TextStyle(
                                         fontSize: 10,
@@ -323,126 +282,40 @@ class _SigninViewState extends State<SigninView> {
                   ),
                   ButtonWidget(
                       text: "Login",
-                      onTap: () async {
-                        showLoaderDialog(context);
-                        if (!_signinFormKey.currentState!.validate()) {
-                          Navigator.pop(context);
-                        }
-                        if (_signinFormKey.currentState!.validate()) {
-                          String? deviceId = await _getId();
-
-                          Map<String, dynamic> mdata;
-                          mdata = {
-                            'email': _emailTextController.text,
-                            'password': sha1
-                                .convert(
-                                    utf8.encode(_passwordTextController.text))
-                                .toString(),
-                            'deviceid': deviceId
-                          };
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          var url = Uri.parse("$urlapi/auth/signin");
-                          log(url.toString());
-                          await satoshiAPI(url, jsonEncode(mdata)).then((ress) {
-                            var result = jsonDecode(ress);
-                            log("100-" + result.toString());
-                            if ((result['code'] == "200") &&
-                                (result["message"]["role"] == "member")) {
-                              prefs.setString(
-                                  "email", _emailTextController.text);
-                              prefs.setString(
-                                  "password",
-                                  sha1
-                                      .convert(utf8
-                                          .encode(_passwordTextController.text))
-                                      .toString());
-                              prefs.setString("refcode",
-                                  result["message"]["refcode"] ?? "");
-                              prefs.setString("id", result["message"]["id"]);
-                              prefs.setString("end_date",
-                                  result["message"]["end_date"] ?? "");
-                              prefs.setString('period',
-                                  result["message"]["total_period"] ?? '0');
-                              prefs.setString("id_referral",
-                                  result["message"]["id_referral"] ?? "");
-                              prefs.setString(
-                                  "role", result["message"]["role"]);
-                              prefs.setString("membership",
-                                  result["message"]["membership"]);
-                              if (result["message"]["membership"] ==
-                                  "expired") {
-                                if (Platform.isAndroid) {
-                                  Get.toNamed("/front-screen/subscribe",
-                                      arguments: [
-                                        {
-                                          "email": _emailTextController.text,
-                                        },
-                                      ]);
-                                }
-                                if (Platform.isIOS) {
-                                  Get.toNamed("/front-screen/inapp",
-                                      arguments: [
-                                        {
-                                          "email": _emailTextController.text,
-                                        },
-                                      ]);
-                                }
-                              } else {
-                                Get.toNamed("/front-screen/home");
-                              }
-                              _signinFormKey.currentState?.reset();
-                              _emailTextController.clear();
-                              _passwordTextController.clear();
-                            } else {
-                              var psnerr = result['message'];
-                              if (Navigator.canPop(context)) {
-                                Navigator.pop(context);
-                              }
-                              showAlert(psnerr, context);
-                            }
-                          }).catchError((err) {
-                            log("100-$err");
-                            Navigator.pop(context);
-                            showAlert(
-                              "Something Wrong, Please Contact Administrator",
-                              context,
-                            );
-                          });
-                        }
-                      },
-                      textcolor: const Color(0xFF000000),
-                      backcolor: const Color(0xFFBFA573),
+                      onTap: () => Get.toNamed(
+                                                "/front-screen/forgot-password"),
+                      textcolor: Colors.white,
+                      backcolor: Colors.blue,
                       width: 150,
                       radiuscolor: const Color(0xFFFFFFFF),
                       fontsize: 16,
                       radius: 5),
                   SizedBox(height: 8.h),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Don't have an account? ",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge
-                              ?.copyWith(fontSize: 12),
-                        ),
-                        TextSpan(
-                          text: 'Register',
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge
-                              ?.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.bold),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Get.toNamed("/front-screen/register");
-                            },
-                        ),
-                      ],
-                    ),
-                  ),
+                  // RichText(
+                  //   text: TextSpan(
+                  //     children: [
+                  //       TextSpan(
+                  //         text: "Don't have an account? ",
+                  //         style: Theme.of(context)
+                  //             .textTheme
+                  //             .displayLarge
+                  //             ?.copyWith(fontSize: 12),
+                  //       ),
+                  //       TextSpan(
+                  //         text: 'Register',
+                  //         style: Theme.of(context)
+                  //             .textTheme
+                  //             .displayLarge
+                  //             ?.copyWith(
+                  //                 fontSize: 12, fontWeight: FontWeight.bold),
+                  //         recognizer: TapGestureRecognizer()
+                  //           ..onTap = () {
+                  //             Get.toNamed("/front-screen/register");
+                  //           },
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                 ]),
               ),
             ),

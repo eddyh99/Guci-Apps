@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guci_apps/views/splashscreen.dart';
+import 'package:guci_apps/views/signin_view.dart';
+// import 'package:guci_apps/views/landing_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,12 +20,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           textTheme: GoogleFonts.poppinsTextTheme(
             Theme.of(context).textTheme,
-          ).apply(displayColor: Colors.white),
+          ).apply(displayColor: Colors.black),
         ),
       getPages: [
         GetPage(
             name: '/',
             page: () => const MainApp(),
+        ),
+        GetPage(
+            name: '/front-screen/login',
+            page: () => const SigninView(),
+            transition: Transition.noTransition,
         ),
       ]
     );
@@ -44,7 +51,7 @@ class _MainAppState extends State<MainApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(seconds: 3), () {
-        Get.offNamed('/front-screen/landing');
+        Get.offNamed('/front-screen/login');
       });
     });
   }
