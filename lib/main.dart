@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guci_apps/views/splashscreen.dart';
 import 'package:guci_apps/views/signin_view.dart';
-// import 'package:guci_apps/views/landing_view.dart';
+import 'package:guci_apps/views/sales/home_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +30,11 @@ class MyApp extends StatelessWidget {
         GetPage(
             name: '/front-screen/login',
             page: () => const SigninView(),
+            transition: Transition.noTransition,
+        ),
+        GetPage(
+            name: '/front-screen/home',
+            page: () => const HomeView(),
             transition: Transition.noTransition,
         ),
       ]

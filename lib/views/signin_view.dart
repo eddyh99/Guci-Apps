@@ -283,7 +283,7 @@ class _SigninViewState extends State<SigninView> {
                   ButtonWidget(
                       text: "Login",
                       onTap: () => Get.toNamed(
-                                                "/front-screen/forgot-password"),
+                                                "/front-screen/home"),
                       textcolor: Colors.white,
                       backcolor: Colors.blue,
                       width: 150,
