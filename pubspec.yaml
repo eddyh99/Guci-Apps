@@ -1,5 +1,5 @@
 name: guci_apps
-description: "A new Flutter project."
+description: "Sales Application Guci Luwak."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -30,15 +30,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get: ^4.6.6
+  get: ^4.7.2
   google_fonts: ^6.2.0
-  intl: ^0.20.1
-  shared_preferences: ^2.2.3
-  crypto: ^3.0.3
-  http: ^1.2.2
-  device_info_plus: ^11.2.0
-  convex_bottom_bar: ^3.2.0
-
+  intl: ^0.20.2
+  shared_preferences: ^2.5.3
+  http: ^1.3.0
+  geolocator: ^14.0.0
+  webview_flutter: ^4.11.0
+  flutter_background_service: ^5.1.0
+  shimmer: ^3.0.0  
+  crypto: ^3.0.6
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8

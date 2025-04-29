@@ -1,79 +1,185 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:guci_apps/utils/globalvar.dart';
+import 'package:http/http.dart' as http;
 import 'package:guci_apps/views/widget/bottomnav_widget.dart';
-import 'package:guci_apps/views/widget/button_widget.dart';
-// import 'package:guci_apps/views/widget/text_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() {
-    return _HomeViewState();
-  }
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
-  late String lang = "en";
-  String urltranslated = "";
-  // bool _isError = false;
-  // bool _isWebViewLoaded = false;
+class _HomeViewState extends State<HomeView> {
+  WebViewController? _controller;
+  bool _isLoading = true;
+  bool _isError = false;
+  Position? _startSpot;
+  Timer? _stayTimer;
+  late StreamSubscription<Position> _positionSubscription;
+  String? sales_id;
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString("username");
+    String? salesId = prefs.getString("sales_id");
+
+    if (username == null ||
+        salesId == null ||
+        username.isEmpty ||
+        salesId.isEmpty) {
+      Get.offAllNamed("/front-screen/login");
+    }
+    setState(() {
+      sales_id = salesId;
+      _controller =
+          WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onPageStarted: (_) {
+                  setState(() {
+                    _isLoading = true;
+                    _isError = false;
+                  });
+                },
+                onPageFinished: (_) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                },
+                onWebResourceError: (_) {
+                  setState(() {
+                    _isLoading = false;
+                    _isError = true;
+                  });
+                },
+              ),
+            )
+            ..loadRequest(
+              Uri.parse("$urlapi/mobile/dashboard"),
+              headers: {'sales-id': sales_id!},
+            );
+    });
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _positionSubscription.cancel();
+    _stayTimer?.cancel();
     super.dispose();
   }
 
+  void _startLocationTracking() {
+    _positionSubscription = Geolocator.getPositionStream().listen((position) {
+      _handlePositionUpdate(position);
+    });
+  }
+
+  void _handlePositionUpdate(Position position) {
+    final double distance =
+        _startSpot == null
+            ? 0
+            : Geolocator.distanceBetween(
+              _startSpot!.latitude,
+              _startSpot!.longitude,
+              position.latitude,
+              position.longitude,
+            );
+
+    _sendRealTimeLocation(position);
+
+    if (_startSpot == null || distance > 20) {
+      // User moved to new spot
+      _startSpot = position;
+      _stayTimer?.cancel();
+      _stayTimer = null;
+    } else {
+      // User still in same area
+      _stayTimer ??= Timer(const Duration(minutes: 5), () {
+        _saveLocation(position);
+        _stayTimer = null;
+      });
+    }
+  }
+
+  Future<void> _sendRealTimeLocation(Position pos) async {
+    try {
+      final uri = Uri.parse('$urlapi/location/realtime');
+      await http.post(
+        uri,
+        body: {
+          'lat': pos.latitude.toString(),
+          'lng': pos.longitude.toString(),
+          'sales_id': sales_id,
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to send real-time location: $e');
+    }
+  }
+
+  Future<void> _saveLocation(Position pos) async {
+    try {
+      final uri = Uri.parse('$urlapi/location/save_location');
+      await http.post(
+        uri,
+        body: {
+          'lat': pos.latitude.toString(),
+          'lng': pos.longitude.toString(),
+          'sales_id': sales_id,
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to save location: $e');
+    }
+  }
+
   @override
-  // void _showErrorBottomSheet() {
-  //   if (mounted) {
-  //     showModalBottomSheet(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return Container(
-  //           padding: const EdgeInsets.all(16.0),
-  //           height: 150,
-  //           decoration: const BoxDecoration(color: Colors.black),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               Text(
-  //                 'Connection error. Please check your internet and try again.',
-  //                 style: Theme.of(
-  //                   context,
-  //                 ).textTheme.displayLarge?.copyWith(fontSize: 16),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //               const SizedBox(height: 20),
-  //               ButtonWidget(
-  //                 text: "Retry",
-  //                 onTap: () {},
-  //                 textcolor: const Color(0xFF000000),
-  //                 backcolor: const Color(0xFFBFA573),
-  //                 width: 150,
-  //                 radiuscolor: const Color(0xFFFFFFFF),
-  //                 fontsize: 16,
-  //                 radius: 5,
-  //               ),
-  //             ],
-  //           ),
-  //         );
-  //       },
-  //     );
-  //   }
-  // }
+  void initState() {
+    super.initState();
+    checkLoginStatus().then((_) {
+      _startLocationTracking();
+    });
+  }
+
+  void _reload() {
+    setState(() {
+      _isLoading = true;
+      _isError = false;
+    });
+    _controller!.reload();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(child: Stack(children: [Container()])),
-      bottomNavigationBar: const Gucinav(number: 0),
+    return SafeArea(
+      child: Scaffold(
+        body:
+            _isError
+                ? Center(
+                  child: ElevatedButton(
+                    onPressed: _reload,
+                    child: Text('Retry'),
+                  ),
+                )
+                : Stack(
+                  children: [
+                    _controller == null
+                        ? const Center(
+                          child: CircularProgressIndicator(),
+                        ) // Show a loading indicator while _controller is null
+                        : WebViewWidget(controller: _controller!),
+                    if (_isLoading) Center(child: CircularProgressIndicator()),
+                  ],
+                ),
+        bottomNavigationBar: const Gucinav(number: 0),
+      ),
     );
   }
 }

@@ -21,7 +21,7 @@ int randomNumber() {
   return r;
 }
 
-Future<String> satoshiAPI(Uri url, String body) async {
+Future<String> gucitoakAPI(Uri url, String body) async {
   final prefs = await SharedPreferences.getInstance();
   var email = prefs.getString("email");
   var passwd = prefs.getString("password");
@@ -35,7 +35,7 @@ Future<String> satoshiAPI(Uri url, String body) async {
   if (token.isNotEmpty) {
     headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token'
+      'Authorization': 'Bearer $token',
     };
   }
 
@@ -47,16 +47,19 @@ showLoaderDialog(BuildContext context) {
   AlertDialog alert = AlertDialog(
     backgroundColor: const Color.fromRGBO(30, 30, 30, 1),
     content: SizedBox(
-        height: 9.h,
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    Color.fromRGBO(114, 162, 138, 1))),
-          ],
-        )),
+      height: 9.h,
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Color.fromRGBO(114, 162, 138, 1),
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 
   showDialog(
@@ -69,13 +72,12 @@ showLoaderDialog(BuildContext context) {
 }
 
 showAlert(String value, BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(
-      value,
-      style: const TextStyle(color: Colors.white),
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(value, style: const TextStyle(color: Colors.white)),
+      backgroundColor: const Color(0xFFBFA573),
     ),
-    backgroundColor: const Color(0xFFBFA573),
-  ));
+  );
 }
 
 String capitalizeFirstLetter(String word) {
